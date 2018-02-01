@@ -7,7 +7,7 @@ import mp_analysis
 class MultiPost(object):
 
     def __init__(self):
-        self.config = mp_config.Config()
+        self.task_queue = mp_config.TaskQueue()
         self.hosts = mp_config.HOSTS
 
     def start(self):
@@ -22,8 +22,8 @@ class MultiPost(object):
             pass
 
     def start_all_threads(self):
-        scan_thread = mp_scan.ScanThread(self.config, self.hosts)
-        analysis_thread = mp_analysis.AnalysisThread(self.config)
+        scan_thread = mp_scan.ScanThread(self.task_queue, self.hosts)
+        analysis_thread = mp_analysis.AnalysisThread(self.task_queue)
 
         scan_thread.start()
         analysis_thread.start()

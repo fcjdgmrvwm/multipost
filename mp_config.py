@@ -4,10 +4,9 @@ HOSTS = {'VmwareUbuntu': 'http://192.168.0.133/',
          'VmwareWin7': 'http://192.168.0.133/', }
 
 
-TaskQueue = queue.Queue()
 
 
-class Config:
+class TaskQueue:
     def __init__(self):
         self.queues = queue.Queue()
 

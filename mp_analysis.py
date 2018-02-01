@@ -4,9 +4,9 @@ import threading
 
 
 class AnalysisThread(threading.Thread):
-    def __init__(self, config):
+    def __init__(self, task_queue):
         super().__init__()
-        self.config = config
+        self.task_queue = task_queue
 
         self.head = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -14,9 +14,12 @@ class AnalysisThread(threading.Thread):
 
     def run(self):
         while True:
-            task = self.config.pop()
+            task = self.task_queue.pop()
             print(task)
+            a = []
             for e in task:
-                print(e.name,e.host,e.sub_url,e.page_links)
+                a.append(e.page_links)
+                print(e.name, e.host, e.sub_url, e.page_links)
+            print(a[0] == a[1])
 
 

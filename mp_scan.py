@@ -41,9 +41,9 @@ class WebServer(object):
 
 
 class ScanThread(threading.Thread):
-    def __init__(self, config, hosts):
+    def __init__(self, task_queue, hosts):
         super().__init__()
-        self.config = config
+        self.task_queue = task_queue
 
         self.head = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -63,7 +63,7 @@ class ScanThread(threading.Thread):
             [pool.putRequest(req) for req in thread_requests]
             pool.wait()
 
-            self.config.push(self.tasks)
+            self.task_queue.push(self.tasks)
             time.sleep(5)
 
     def scan(self, web_server):
