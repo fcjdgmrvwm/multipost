@@ -44,7 +44,7 @@ class ScanThread(threading.Thread):
     def __init__(self, task_queue, hosts):
         super().__init__()
         self.task_queue = task_queue
-
+        self.tasks = []
         self.head = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0'}
@@ -58,7 +58,7 @@ class ScanThread(threading.Thread):
             for web_server in self.web_servers:
                 web_server.set_sub_url(selected_sub_url)
 
-            pool = threadpool.ThreadPool(100)
+            pool = threadpool.ThreadPool(10)
             thread_requests = threadpool.makeRequests(self.scan, self.web_servers)
             [pool.putRequest(req) for req in thread_requests]
             pool.wait()
@@ -74,6 +74,7 @@ class ScanThread(threading.Thread):
         self.update_sitemap(cur_sub_urls)
 
         page_links = [start_url + cur_sub_url for cur_sub_url in cur_sub_urls]
+        page_links.append(start_url)
         web_server.set_page_links(page_links)
         self.tasks.append(web_server)
 
@@ -109,75 +110,3 @@ class ScanThread(threading.Thread):
         for sub_url in cur_sub_urls:
             self.sub_urls.add(sub_url)
 
-#
-# head = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 '
-#                   'Safari/537.36 SE 2.X MetaSr 1.0'}
-# base_url = 'http://192.168.0.133/'
-# sub_urls = {'/'}
-#
-# '''
-# 说明: 提取页面中的链接,并将外部链接过滤去除
-# 输入: http的response报文
-# 输出: 经过提取的相对url列表
-# '''
-#
-#
-# def extract_link(page):
-#     matchs = re.findall(r"(?<=href=\").+?(?=\")|(?<=href=\').+?(?=\')|"
-#                         r"(?<=src=\").+?(?=\")|(?<=src=\').+?(?=\')", page.text)
-#     matchs = [match for match in matchs if match[:4] != "http"]
-#
-#     # for link in matchs:
-#     #     print(link)
-#     return matchs
-#
-#
-# '''
-# 说明: 比对该页面以及子页面的时间戳
-# 输入: 此次爬取获得的新URL列表
-# 输出:
-# '''
-#
-#
-# def get_timestamp(url):
-#     response = requests.head(url, headers=head)
-#     print(response.headers['Last-Modified'])
-#
-#
-# def compare_content(cur_sub_urls):
-#     time_stamps = []
-#     urls = [base_url + sub_url for sub_url in cur_sub_urls]
-#     # for sub_url in cur_sub_urls:
-#     #     url = base_url + sub_url
-#     #     response = requests.head(url, headers=head)
-#     #     time_stamps.append(response.headers['Last-Modified'])
-#     #     print(response.headers['Last-Modified'])
-#
-#     pool = threadpool.ThreadPool(1000)
-#     thread_requests = threadpool.makeRequests(get_timestamp, urls)
-#     [pool.putRequest(req) for req in thread_requests]
-#     pool.wait()
-#
-#     print(time_stamps)
-#
-#
-# '''
-# 说明: 更新全站URL目录结构,将每次爬取获得的新URL加入到已有的集合当中
-# 输入: 此次爬取获得的新URL列表
-# 输出:
-# '''
-#
-#
-# def update_sitemap(cur_sub_urls):
-#     for sub_url in cur_sub_urls:
-#         sub_urls.add(sub_url)
-#
-#
-# html = requests.get(base_url, headers=head)
-#
-# cur_sub_urls = extract_link(html)
-# update_sitemap(cur_sub_urls)
-# compare_content(cur_sub_urls)
-#
-# print(sub_urls.__len__())

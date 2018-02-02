@@ -29,9 +29,6 @@ class MultiPost(object):
         analysis_thread.start()
 
 
-
-
-
 def main():
     app = MultiPost()
     app.start()
