@@ -10,7 +10,7 @@ class SocketClient(object):
         self.sk.connect((self.host, self.port))  # 要连接的IP与端口
 
     def send_cmd(self, command):
-        self.sk.send(command)
+        self.sk.send(command.encode())
 
     def __del__(self):
         self.sk.close()

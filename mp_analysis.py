@@ -51,7 +51,8 @@ class AnalysisThread(threading.Thread):
 
     def exception_handling(self, tasks, abnormal):
         for index in abnormal:
-            self.socket_client.send(tasks[index].name)
+            self.socket_client.send_cmd(tasks[index].name)
+        self.socket_client.send_cmd("None")
 
     def get_timestamp(self, task):
         response = requests.head(task[1], headers=self.head)
@@ -88,5 +89,3 @@ class AnalysisThread(threading.Thread):
             if str(key) != max_value:
                 abnormal.add(index)
         return abnormal
-
-
