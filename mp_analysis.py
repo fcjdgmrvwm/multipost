@@ -5,9 +5,10 @@ import time
 
 
 class AnalysisThread(threading.Thread):
-    def __init__(self, task_queue):
+    def __init__(self, task_queue, socket_client):
         super().__init__()
         self.task_queue = task_queue
+        self.socket_client = socket_client
         self.result = [{}]
         self.head = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -19,7 +20,9 @@ class AnalysisThread(threading.Thread):
 
             t1 = time.time()
 
-            self.analysis(tasks)
+            abnormal = self.analysis(tasks)
+
+            self.exception_handling(tasks, abnormal)
 
             t2 = time.time()
             print(t2 - t1)
@@ -38,6 +41,17 @@ class AnalysisThread(threading.Thread):
 
         abnormal = self.select_majority(self.result)
         print(abnormal)
+        return abnormal
+
+    '''
+    说明: 异常处理函数,将异常页面的主机名称发送给控制器,进行下线自清洗
+    输入: 当前所有的服务器结构体列表,异常主机集合
+    输出: 
+    '''
+
+    def exception_handling(self, tasks, abnormal):
+        for index in abnormal:
+            self.socket_client.send(tasks[index].name)
 
     def get_timestamp(self, task):
         response = requests.head(task[1], headers=self.head)

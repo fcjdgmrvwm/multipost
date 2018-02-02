@@ -1,8 +1,10 @@
 import queue
 
-HOSTS = {'VmwareUbuntu': 'http://192.168.0.133/',
-         'VmwareWin7': 'http://192.168.0.133/', }
+SERVER_HOSTS = {'VmwareUbuntu': 'http://192.168.0.133/',
+                'VmwareWin7': 'http://192.168.0.133/', }
 
+CONTROLLER_HOST = '127.0.0.1'
+CONTROLLER_PORT = 12345
 
 
 
