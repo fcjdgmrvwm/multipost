@@ -12,7 +12,8 @@ class AnalysisThread(threading.Thread):
         self.result = [{}]
         self.head = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0'}
+                          'Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0'
+        }
 
     def run(self):
         while True:
@@ -24,14 +25,16 @@ class AnalysisThread(threading.Thread):
 
             self.exception_handling(tasks, abnormal)
 
+            # print(abnormal)
             t2 = time.time()
             print(t2 - t1)
 
     def analysis(self, tasks):
-        self.result = [{}] * len(tasks)
+        self.result=[{} for i in range(len(tasks))]
+        #self.result = [{}] * len(tasks)
         pools = []
         for index, web_server in enumerate(tasks):
-            pool = threadpool.ThreadPool(10)
+            pool = threadpool.ThreadPool(5)
             pools.append(pool)
             task = [[index, page_link] for page_link in web_server.page_links]
             thread_requests = threadpool.makeRequests(self.get_timestamp, task)
@@ -40,7 +43,8 @@ class AnalysisThread(threading.Thread):
             pool.wait()
 
         abnormal = self.select_majority(self.result)
-        print(abnormal)
+        for i in abnormal:
+            print(tasks[i].name)
         return abnormal
 
     '''
@@ -56,7 +60,11 @@ class AnalysisThread(threading.Thread):
 
     def get_timestamp(self, task):
         response = requests.head(task[1], headers=self.head)
-        self.result[task[0]][task[1]] = response.headers['Last-Modified']
+        num = len('http://127.0.0.1:8080')
+        #7 http:// 8 https://
+        idx = task[1].find('/',10)
+        relative_path = task[1][idx:]
+        self.result[task[0]][relative_path] = response.headers['Last-Modified']
 
     '''
     说明: 择多算法,在给定列表中选择最多的作为正常页面
@@ -69,14 +77,18 @@ class AnalysisThread(threading.Thread):
         if len(array) == 0:
             return
         hash_map = {}
+
+        key_strs = []
         for key in array:
-            key_str = str(key)
+            key_strs.append(str([(k,key[k]) for k in sorted(key.keys())]))
+
+        for key_str in key_strs:
             if key_str in hash_map:
                 hash_map[key_str] += 1
             else:
                 hash_map[key_str] = 1
 
-        max_value = array[0]
+        max_value = str(array[0])
         max_num = 1
 
         for key_str in hash_map:
@@ -85,7 +97,7 @@ class AnalysisThread(threading.Thread):
                 max_value = key_str
 
         abnormal = set()
-        for index, key in enumerate(array):
-            if str(key) != max_value:
+        for index, key_str in enumerate(key_strs):
+            if key_str != max_value:
                 abnormal.add(index)
         return abnormal

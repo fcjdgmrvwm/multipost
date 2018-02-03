@@ -75,6 +75,11 @@ class ScanThread(threading.Thread):
 
         page_links = [start_url + cur_sub_url for cur_sub_url in cur_sub_urls]
         page_links.append(start_url)
+        # 页面中可能会有'/'这样的链接
+        # 所以page_links可能会包含形如http://127.0.0.1//
+        # 这种后面有两条杠的链接
+        #if '/' in cur_sub_urls:
+        #    print("lueluelue")
         web_server.set_page_links(page_links)
         self.tasks.append(web_server)
 
