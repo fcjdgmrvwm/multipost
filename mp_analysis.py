@@ -3,7 +3,6 @@ import threadpool
 import threading
 import time
 
-
 class AnalysisThread(threading.Thread):
     def __init__(self, task_queue, socket_client):
         super().__init__()
@@ -14,6 +13,7 @@ class AnalysisThread(threading.Thread):
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/38.0.2125.122 Safari/537.36 SE 2.X MetaSr 1.0'
         }
+        self.pool = threadpool.ThreadPool(10)
 
     def run(self):
         while True:
@@ -28,19 +28,17 @@ class AnalysisThread(threading.Thread):
             # print(abnormal)
             t2 = time.time()
             print(t2 - t1)
+            time.sleep(1) # in case of thread start failed
 
     def analysis(self, tasks):
-        self.result=[{} for i in range(len(tasks))]
-        #self.result = [{}] * len(tasks)
-        pools = []
+        self.result=[{} for i in range(len(tasks))] # 4 pointer, 4 dict.
+        #self.result = [{}] * len(tasks) this will cause error, since 4 pointer, 1 dict.
         for index, web_server in enumerate(tasks):
-            pool = threadpool.ThreadPool(5)
-            pools.append(pool)
             task = [[index, page_link] for page_link in web_server.page_links]
             thread_requests = threadpool.makeRequests(self.get_timestamp, task)
-            [pool.putRequest(req) for req in thread_requests]
-        for pool in pools:
-            pool.wait()
+            [self.pool.putRequest(req) for req in thread_requests]
+
+        self.pool.wait()
 
         abnormal = self.select_majority(self.result)
         for i in abnormal:

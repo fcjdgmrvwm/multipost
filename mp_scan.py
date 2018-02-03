@@ -52,17 +52,16 @@ class ScanThread(threading.Thread):
         self.sub_urls = {'/'}
 
     def run(self):
+        pool = threadpool.ThreadPool(10)
         while True:
             self.tasks = []
             selected_sub_url = self.select_sub_url(self.sub_urls)
             for web_server in self.web_servers:
                 web_server.set_sub_url(selected_sub_url)
-
-            pool = threadpool.ThreadPool(10)
             thread_requests = threadpool.makeRequests(self.scan, self.web_servers)
             [pool.putRequest(req) for req in thread_requests]
             pool.wait()
-
+            #pool.dismissWorkers(10, do_join=True)
             self.task_queue.push(self.tasks)
             time.sleep(5)
 
