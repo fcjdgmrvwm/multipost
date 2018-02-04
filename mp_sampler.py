@@ -34,7 +34,7 @@ class sampler:
 
     @staticmethod
     def geometry_sampler(sub_urls):
-        # sample from given distribution
+        # sample from geometry distribution
         order_dict = {}
         for url in sub_urls:
             url_order = sampler.compute_link_order(url)
